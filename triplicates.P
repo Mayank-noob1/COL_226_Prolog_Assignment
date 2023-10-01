@@ -1,0 +1,7 @@
+has_no_triplicates([]).
+has_no_triplicates([X|Xs]) :- count(X, [X|Xs], N), N < 3, has_no_triplicates(Xs).
+
+% Counting the occurence
+count(_, [], 0).
+count(X, [X|Xs], N) :- count(X, Xs, N1), N is N1 + 1.
+count(X, [Q|Ys], N) :- X =\= Q,count(X, Ys, N).

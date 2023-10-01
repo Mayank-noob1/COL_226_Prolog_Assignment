@@ -1,0 +1,75 @@
+% Persons.
+person(alice).
+person(bob).
+person(carol).
+person(davis).
+
+% These can cross.
+can_cross(alice,_) :- false.
+can_cross(bob,_) :- false.
+can_cross(bob,carol).
+can_cross(carol,_).
+can_cross(davis,_).
+can_cross(bob) :- false.
+can_cross(_).
+
+% Who paddled twice?
+help(Visit):- 
+    count_occurrences_head(alice,Visit,N1),
+    N1 =:= 2, write('Alice paddled twice.'),nl.
+
+help(Visit):- 
+    count_occurrences_head(bob,Visit,N1),
+    N1 =:= 2, write('Bob paddled twice.'),nl.
+
+help(Visit):- 
+    count_occurrences_head(carol,Visit,N1),
+    N1 =:= 2, write('Carol paddled twice.'),nl.
+
+help(Visit):- 
+    count_occurrences_head(davis,Visit,N1),
+    N1 =:= 2, write('Davis paddled twice.'),nl.
+
+
+% Travelling from left bank.
+travel_left([], _,Visit) :-
+    count_occurrences_head(alice,Visit,N1),N1 >= 1,
+    count_occurrences_head(bob,Visit,N2),N2 >= 1,
+    count_occurrences_head(carol,Visit,N3),N3 >= 1,
+    count_occurrences_head(davis,Visit,N4),N4 >= 1,
+    help(Visit),
+    write('Path :'),
+    write(Visit),nl.
+
+travel_left(Left, Right,Visit) :-
+    select(SoloPerson, Right, NewRight),
+    can_cross(SoloPerson),
+    append([SoloPerson], Left, NewLeft),
+    append([[SoloPerson]], Visit,NewVisited),
+    travel_right(NewLeft, NewRight,NewVisited).
+
+% Travelling from right bank.
+travel_right(Left, Right,Visit) :-
+    Left \= Right, % Make sure the lists are not identical
+    select(Person1, Left, LeftRemove),
+    select(Person2, LeftRemove, NewLeft),
+    can_cross(Person1, Person2),
+    append([Person1, Person2], Right, NewRight),
+    append([[Person1,Person2]], Visit,NewVisited),
+    travel_left(NewLeft, NewRight,NewVisited).
+
+
+% Count the paddler head count.
+count_occurrences_head(Element, ListOfLists, Count) :-
+    count_occurrences_head(Element, ListOfLists, 0, Count).
+
+count_occurrences_head(_, [], Count, Count).
+count_occurrences_head(Element, [H|T], Acc, Count) :-
+    (   [Element|_] = H
+    ->  Acc1 is Acc + 1
+    ;   Acc1 = Acc
+    ),
+    count_occurrences_head(Element, T, Acc1, Count).
+
+% Predicate to run.
+abcd :- travel_right([alice,bob,carol,davis],[],[]).

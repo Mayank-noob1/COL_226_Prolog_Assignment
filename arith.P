@@ -1,0 +1,43 @@
+% For adding the element '-' and  '=' whenever needed.
+add_elements([X|List], NewList,X) :-
+    insert([X|List], 0, -, TempList),
+    insert(TempList, 3, =, NewList).
+add_elements([X|List], NewList,Y) :-
+    X \= Y,
+    insert([X|List], 0, -, TempList),
+    insert(TempList, 2, =, NewList).
+
+% Insert any element at an index.
+insert(List, Index, Element, NewList) :-
+    length(Prefix, Index),  
+    append(Prefix, Suffix, List), 
+    append(Prefix, [Element|Suffix], NewList). 
+
+% List -> String
+implode(List, String) :-
+    string_codes(String, List).
+
+% Generate permutation and assign expressions
+equations(Numbers, Equation) :-
+    permutation(Numbers, Perm),
+    build_expression(Perm, Expression),
+    Equation = Expression.
+
+% Generate all possible expression
+build_expression([X], X).
+build_expression([X|Xs], Expression) :-
+    build_expression(Xs, Rest),
+    Expression = X + Rest.
+build_expression([X|Xs], Expression) :-
+    build_expression(Xs, Rest),
+    Expression = X - Rest.
+
+% If expression == 0 then print it.
+arith(Numbers) :-
+    equations(Numbers, Equation),
+    Equation =:= 0,
+    term_string(Equation, EqStr), 
+    string_chars(EqStr,Char),
+    add_elements(Char,Wen,-),
+    implode(Wen,X),
+    write(X),nl,!.
